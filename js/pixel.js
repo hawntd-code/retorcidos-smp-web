@@ -1,11 +1,108 @@
-// Arte pixel de la landing, hecho con código: texturas de 16 × 16, bloques isométricos,
-// criaturas, objetos y el corte del mundo de cada capa. Todo sale de un generador con
-// semilla, así que se ve igual en cada visita y no hay imágenes que descargar.
-// Es arte original con estética de bloques: no usa texturas, logos ni fuentes de Minecraft.
+// Arte pixel de la página: bloques, objetos, criaturas y el corte del mundo de cada capa.
+// Las texturas son las del juego: img/mc/atlas.png sale del jar del cliente 26.3 con
+// herramientas/texturas_mc.py y se carga una vez al arrancar (load). Lo que no existe en el juego
+// (la marca del server, el minero de Parabellum, las caras, los pájaros) se dibuja aquí con código,
+// y esos mismos dibujos quedan de respaldo si el atlas no carga.
+// La marca (el bloque del encabezado, el pie y el ícono) y el título van siempre con dibujo propio:
+// Mojang no deja usar sus texturas como logo. Para eso existe el prefijo «own:» en los nombres.
 
 const TILE = 16;
 const cache = new Map();
 const urls = new WeakMap();
+
+// ---------------------------------------------------------------- las texturas del juego
+
+let atlas = null;
+let atlasIndex = null;
+
+// Carga el atlas; si tarda más de `wait` ms o falla, la página sigue con los dibujos propios.
+async function load(base = 'img/mc/', wait = 4000) {
+  const image = new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = `${base}atlas.png`;
+  });
+  const index = fetch(`${base}atlas.json`).then(response => {
+    if (!response.ok) throw new Error(`atlas.json: ${response.status}`);
+    return response.json();
+  });
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('el atlas tardó demasiado')), wait));
+  try {
+    [atlas, atlasIndex] = await Promise.race([Promise.all([image, index]), timeout]);
+    cache.clear();
+    return true;
+  } catch (error) {
+    atlas = atlasIndex = null;
+    console.warn('Texturas del juego sin cargar; se usan los dibujos propios.', error);
+    return false;
+  }
+}
+
+const real = () => Boolean(atlasIndex);
+
+// Una pieza del atlas en su propio canvas: «b:dirt», «o:gem-diamond», «c:pig-0», «g:4», «p:12».
+function piece(key) {
+  if (!atlasIndex || !atlasIndex[key]) return null;
+  const cacheKey = `a|${key}`;
+  if (!cache.has(cacheKey)) {
+    const [x, y, w, h] = atlasIndex[key];
+    const canvas = makeCanvas(w, h);
+    canvas.getContext('2d').drawImage(atlas, x, y, w, h, 0, 0, w, h);
+    cache.set(cacheKey, canvas);
+  }
+  return cache.get(cacheKey);
+}
+
+// Como en el juego, algunos bloques salen girados al azar para que no se note la repetición.
+const TURNING = new Set(['dirt', 'grassTop', 'netherrack', 'bedrock']);
+function turned(source, name, variant) {
+  const quarter = variant % 4;
+  const mirror = name === 'stone' && variant % 2 === 1;
+  if (!(TURNING.has(name) && quarter) && !mirror) return source;
+  const canvas = makeCanvas(source.width, source.height);
+  const ctx = canvas.getContext('2d');
+  ctx.translate(source.width / 2, source.height / 2);
+  if (mirror) ctx.scale(-1, 1);
+  else ctx.rotate((quarter * Math.PI) / 2);
+  ctx.drawImage(source, -source.width / 2, -source.height / 2);
+  return canvas;
+}
+
+// Lo opaco de un sprite, sin el margen transparente (para ponerlo dentro de un bloque del mundo).
+function trimmed(canvas) {
+  if (canvas.trimmed) return canvas.trimmed;
+  const { width: w, height: h } = canvas;
+  const data = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (data[(y * w + x) * 4 + 3] < 8) continue;
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x);
+      y1 = Math.max(y1, y);
+    }
+  }
+  if (x1 < 0) return canvas;
+  const out = makeCanvas(x1 - x0 + 1, y1 - y0 + 1);
+  out.getContext('2d').drawImage(canvas, -x0, -y0);
+  canvas.trimmed = out;
+  return out;
+}
+
+// La lana de la oveja: el juego multiplica la textura blanca por el color del tinte.
+function tinted(source, color) {
+  const canvas = makeCanvas(source.width, source.height);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(source, 0, 0);
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.drawImage(source, 0, 0);
+  return canvas;
+}
 
 // ---------------------------------------------------------------- utilidades
 
@@ -434,9 +531,17 @@ function paintTint(ctx, random, colors) {
   }
 }
 
-function texture(name, variant = 0) {
-  const key = `t|${name}|${variant}`;
+// «own:NOMBRE» pide el dibujo propio aunque exista la textura del juego (la marca del server).
+function texture(fullName, variant = 0) {
+  const key = `t|${fullName}|${variant}`;
   if (!cache.has(key)) {
+    const own = fullName.startsWith('own:');
+    const name = own ? fullName.slice(4) : fullName;
+    const game = own ? null : piece(`b:${name}`);
+    if (game) {
+      cache.set(key, turned(game, name, variant));
+      return cache.get(key);
+    }
     const canvas = makeCanvas(TILE, TILE);
     const ctx = canvas.getContext('2d');
     const random = mulberry32(hash(name) + variant * 7919);
@@ -492,8 +597,32 @@ function lit(name, variant, mix) {
   return canvas;
 }
 
-// Los colores con los que estalla un bloque al romperse.
+// Los colores con los que estalla un bloque al romperse: con la textura del juego, los tres más comunes
+// y los dos más vivos (en una mena, los del mineral).
 function colorsOf(name) {
+  if (piece(`b:${name}`)) {
+    const key = `colors|${name}`;
+    if (!cache.has(key)) {
+      const canvas = piece(`b:${name}`);
+      const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      const counts = new Map();
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 200) continue;
+        const hex = `#${((1 << 24) | (data[i] << 16) | (data[i + 1] << 8) | data[i + 2]).toString(16).slice(1)}`;
+        counts.set(hex, (counts.get(hex) || 0) + 1);
+      }
+      const all = [...counts.keys()];
+      const vivid = hex => {
+        const n = parseInt(hex.slice(1), 16);
+        const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        return Math.max(...c) - Math.min(...c);
+      };
+      const common = [...all].sort((a, b) => counts.get(b) - counts.get(a)).slice(0, 3);
+      const bright = [...all].sort((a, b) => vivid(b) - vivid(a)).filter(hex => !common.includes(hex)).slice(0, 2);
+      cache.set(key, [...common, ...bright]);
+    }
+    return cache.get(key);
+  }
   if (name.startsWith('ore:')) {
     const [, base, kind] = name.split(':');
     return [ORES[kind][0], ORES[kind][1], PALETTES[base][0], PALETTES[base][1]];
@@ -507,7 +636,10 @@ function colorsOf(name) {
 const CRACK_DIRECTIONS = [[1, 0], [-1, -1], [0, 1], [-1, 1], [1, -1], [-1, 0], [0, -1], [1, 1]];
 let crackStrokes = null;
 
+// La grieta del juego tiene diez etapas; aquí el bloque se rompe al quinto golpe.
 function crack(stage) {
+  const game = piece(`g:${clamp(Math.round((stage * 9) / 5), 0, 9)}`);
+  if (game) return game;
   const key = `crack|${stage}`;
   if (cache.has(key)) return cache.get(key);
   if (!crackStrokes) {
@@ -1090,6 +1222,8 @@ Object.keys(INGOTS).forEach(name => {
 });
 
 function sprite(name) {
+  const game = piece(`o:${name}`) || (name === 'creeper' && piece('c:creeper'));
+  if (game) return game;
   const key = `sprite|${name}`;
   if (!cache.has(key)) {
     const make = SPRITES[name];
@@ -1099,13 +1233,35 @@ function sprite(name) {
   return cache.get(key);
 }
 
+// Las criaturas del juego miran a la derecha y tienen dos cuadros (parado y dando un paso). La oveja es su
+// piel más la lana teñida encima.
 function mob(kind, frame, color) {
   const key = `mob|${kind}|${frame}|${color || ''}`;
   if (!cache.has(key)) {
-    const make = { sheep: () => sheep(frame, color || '#ece8f2'), pig: () => pig(frame), chicken: () => chicken(frame), creeper }[kind];
-    cache.set(key, make());
+    let canvas = null;
+    if (kind === 'creeper') canvas = piece('c:creeper');
+    else if (kind === 'sheep') {
+      const skin = piece(`c:sheep-${frame}`);
+      const wool = piece(`c:sheepwool-${frame}`);
+      if (skin && wool) {
+        canvas = makeCanvas(skin.width, skin.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(skin, 0, 0);
+        ctx.drawImage(tinted(wool, color || '#f9fffe'), 0, 0);
+      }
+    } else canvas = piece(`c:${kind}-${frame}`);
+    if (!canvas) canvas = { sheep: () => sheep(frame, color || '#ece8f2'), pig: () => pig(frame), chicken: () => chicken(frame), creeper }[kind]();
+    cache.set(key, canvas);
   }
   return cache.get(key);
+}
+
+// Un cuadro de la animación del portal del Nether (null sin el atlas).
+function portal(time) {
+  if (!atlasIndex) return null;
+  let frames = 0;
+  while (atlasIndex[`p:${frames}`]) frames++;
+  return frames ? piece(`p:${Math.floor(time * 12.5) % frames}`) : null;
 }
 
 // Lo que cae al romper un mineral.
@@ -1259,9 +1415,9 @@ function world(options) {
       const besideLeftWall = solid[r][c - 1] && !isShaft(c - 1);
       const besideRightWall = solid[r][c + 1];
       if (config.torches && walls && r % 6 === 3 && (besideLeftWall || besideRightWall) && torches.length < 6) {
-        const torch = sprite('torch');
+        const torch = trimmed(sprite('torch'));
         const nearLeft = besideLeftWall;
-        ctx.drawImage(torch, nearLeft ? x + 1 : x + 10, y + 3);
+        ctx.drawImage(torch, nearLeft ? x + 2 : x + 14 - torch.width, y + 13 - torch.height);
         torches.push({ x: (c + (nearLeft ? 0.12 : 0.78)) * bs, y: (r + 0.45) * bs });
       }
       // Varas del End: blancas, de pie junto a la pared.
@@ -1273,7 +1429,8 @@ function world(options) {
         rods.push({ x: (c + (besideLeftWall ? 0.19 : 0.75)) * bs, y: (r + 0.45) * bs });
       }
       if (config.geode && (solid[r + 1] && solid[r + 1][c] || besideLeftWall || besideRightWall) && random() < 0.35) {
-        ctx.drawImage(sprite('bud'), x + 4, y + 9);
+        const bud = trimmed(sprite('bud'));
+        ctx.drawImage(bud, x + Math.floor((TILE - bud.width) / 2), y + TILE - bud.height);
         if (crystals.length < 12) crystals.push({ x: (c + 0.5) * bs, y: (r + 0.75) * bs });
       }
       const nearFloor = r * bs + bs / 2 > height - (floor[c] + 1) * bs;
@@ -1469,4 +1626,4 @@ function logo(text, options = {}) {
   return canvas;
 }
 
-export const Pixel = { texture, shaded, lit, crack, iso, sprite, mob, dropFor, colorsOf, url, world, ground, logo, mulberry32, hash, makeCanvas };
+export const Pixel = { load, real, texture, shaded, lit, crack, iso, sprite, mob, portal, dropFor, colorsOf, url, world, ground, logo, mulberry32, hash, makeCanvas };

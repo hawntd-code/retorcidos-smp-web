@@ -1376,8 +1376,8 @@ body.below-surface #theme-toggle { display: none; }
 .sky-bodies { right: 5%; top: calc(var(--header) + 24px); }
 
 /* La llave que flota sobre el pasto (en lugar del bloque del logo del prototipo). */
-.drop-logo { width: 96px; height: 60px; }
-.drop-logo img { image-rendering: pixelated; filter: drop-shadow(0 0 18px rgba(255, 178, 31, .55)); }
+.drop-logo { width: 72px; height: 72px; }
+.drop-logo img { object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 0 18px rgba(255, 178, 31, .55)); }
 .drop-shadow { bottom: -26px; }
 
 /* ------------------------------------------------------------------ texto de las capas */
@@ -1650,7 +1650,7 @@ button.slot:hover { background: #a8a8a8; }
 }
 .crate-tabs button:hover { background: #7f86b8; color: #ffffa0; }
 .crate-tabs button[aria-selected="true"] { background: #8b8b8b; color: #ffffff; box-shadow: 0 0 0 2px #ffffff, inset 2px 2px 0 #c6c6c6, inset -2px -3px 0 #555555; }
-.crate-tabs i { width: 28px; height: 14px; background: var(--px) center / contain no-repeat; image-rendering: pixelated; }
+.crate-tabs i { width: 24px; height: 24px; background: var(--px) center / contain no-repeat; image-rendering: pixelated; }
 .crate-gui { --caja: #d4d4d8; }
 .crate-rows { display: grid; }
 .panes { display: flex; }
@@ -1678,7 +1678,7 @@ button.slot:hover { background: #a8a8a8; }
 .keys-table tbody tr + tr { border-top: 1px solid rgba(255, 255, 255, .07); }
 .keys-table tbody th { white-space: nowrap; }
 .keys-table tbody th span { display: inline-flex; align-items: center; gap: 10px; color: var(--color); font: 400 1.05rem/1 var(--display); }
-.keys-table tbody th i { width: 28px; height: 14px; background: var(--px) center / contain no-repeat; image-rendering: pixelated; }
+.keys-table tbody th i { width: 24px; height: 24px; background: var(--px) center / contain no-repeat; image-rendering: pixelated; }
 .keys-table td { color: var(--muted); }
 .odds { color: #ffffff; font: 1.3rem/1 var(--pixel); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -1849,7 +1849,7 @@ button.slot:hover { background: #a8a8a8; }
   .clouds { display: none; }
   .tree-a { right: 52%; }
   .tree-b { right: 2%; }
-  .drop-logo { right: auto; left: 26%; width: 72px; height: 46px; bottom: calc(var(--ground) + 70px); }
+  .drop-logo { right: auto; left: 26%; width: 56px; height: 56px; bottom: calc(var(--ground) + 70px); }
   .dig-cue { display: none; }
   .hills { height: 170px; }
 

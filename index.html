@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=VT323&display=swap">
 <link rel="stylesheet" href="css/sitio.css">
+<link rel="preload" href="img/mc/atlas.png" as="image">
+<link rel="preload" href="img/mc/atlas.json" as="fetch" crossorigin>
 <script>
   // El cielo que eligió la persona (de noche si nunca eligió), antes de pintar, para que no parpadee.
   try { if (localStorage.getItem('retorcidos-cielo') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
@@ -27,7 +29,7 @@
 <header class="site-header" id="site-header">
   <div class="hud-left">
     <a class="brand hud-island" id="brand" href="#inicio" aria-label="Retorcidos SMP, volver arriba">
-      <img data-px-img="iso:warpedTop|warpedNylium" alt="" width="34" height="34"><span>retorcidos</span>
+      <img data-px-img="iso:own:warpedTop|own:warpedNylium" alt="" width="34" height="34"><span>retorcidos</span>
     </a>
     <nav class="main-nav" aria-label="Secciones">
       <a href="#reglas">Reglas</a>
@@ -96,7 +98,7 @@
       <div class="flowers" id="flowers" aria-hidden="true"></div>
       <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <button class="drop-logo" id="drop-logo" type="button" aria-label="Recoger la llave">
-        <img data-px-img="sprite:key-legendaria" alt="" width="96" height="48"><i class="drop-shadow" aria-hidden="true"></i>
+        <img data-px-img="sprite:key-legendaria" alt="" width="64" height="64"><i class="drop-shadow" aria-hidden="true"></i>
       </button>
       <div class="mobs" id="mobs"></div>
       <canvas class="ground" id="ground" aria-hidden="true"></canvas>
@@ -368,7 +370,7 @@
         <div>
           <div class="server-list">
             <div class="server-entry">
-              <img data-px-img="iso:warpedTop|warpedNylium" alt="" width="64" height="64">
+              <img data-px-img="iso:own:warpedTop|own:warpedNylium" alt="" width="64" height="64">
               <span class="se-name">Retorcidos SMP</span>
               <span class="se-ping" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
               <span class="se-motd">Java · <span>retorci2.play.hosting</span></span>
@@ -413,7 +415,7 @@
   <div class="wrap footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <a class="brand" href="#inicio"><img data-px-img="iso:warpedTop|warpedNylium" alt="" width="30" height="30"><span>retorcidos</span></a>
+        <a class="brand" href="#inicio"><img data-px-img="iso:own:warpedTop|own:warpedNylium" alt="" width="30" height="30"><span>retorcidos</span></a>
       </div>
       <nav class="footer-col footer-dig" aria-labelledby="f-capas">
         <p class="footer-kicker" id="f-capas">El viaje</p>
@@ -442,7 +444,7 @@
         <a class="to-surface" href="#inicio">Volver a la superficie <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M4 0h2v2H4zM2 2h2v2H2zM6 2h2v2H6zM0 4h2v2H0zM8 4h2v2H8z"/></svg></a>
       </span>
     </div>
-    <p class="legal">Proyecto de la comunidad, sin relación con Mojang ni Microsoft.</p>
+    <p class="legal">Retorcidos SMP no es un server oficial de Minecraft. No está aprobado por Mojang ni por Microsoft, ni asociado con ellos. Las texturas de bloques, objetos y criaturas son de Minecraft y pertenecen a Mojang.</p>
   </div>
   <p class="footer-sign" aria-hidden="true">retorcidos</p>
 </footer>

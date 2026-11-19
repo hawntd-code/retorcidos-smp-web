@@ -301,14 +301,16 @@ function updateParallax() {
 // ---------------------------------------------------------------- criaturas
 
 const MOB_INFO = {
-  sheep: { w: 20, h: 14, speed: 26 },
-  pig: { w: 18, h: 12, speed: 30 },
-  chicken: { w: 12, h: 13, speed: 36 },
-  creeper: { w: 8, h: 16, speed: 0 },
+  sheep: { speed: 26 },
+  pig: { speed: 30 },
+  chicken: { speed: 36 },
+  creeper: { speed: 0 },
 };
-const WOOL = ['#ece8f2', '#c9a8ff', '#7ff3ea', '#ffd84a', '#ff9fc3', '#8fe082', '#5a4a72'];
+// Los tintes del juego: blanco, magenta, azul claro, amarillo, rosa, verde lima y morado.
+const WOOL = ['#f9fffe', '#c74ebd', '#3ab3da', '#fed83d', '#f38baa', '#80c71f', '#8932b8'];
 const mobs = [];
-const mobScale = () => (state.metrics.bs >= 48 ? 4 : 3);
+// Las criaturas del juego miden lo que su modelo (un cerdo, 25 × 16 pixeles): van a 3 por pixel, 2 en pantallas chicas.
+const mobScale = () => (P.real() ? (state.metrics.bs >= 48 ? 3 : 2) : state.metrics.bs >= 48 ? 4 : 3);
 
 function setMobFrames(mob) {
   mob.el.style.setProperty('--f0', `url(${P.url(P.mob(mob.kind, 0, mob.color))})`);
@@ -317,10 +319,10 @@ function setMobFrames(mob) {
 
 function sizeMob(mob) {
   const scale = mobScale();
-  const info = MOB_INFO[mob.kind];
-  mob.w = info.w * scale;
-  mob.el.style.width = `${info.w * scale}px`;
-  mob.el.style.height = `${info.h * scale}px`;
+  const frame = P.mob(mob.kind, 0, mob.color);
+  mob.w = frame.width * scale;
+  mob.el.style.width = `${frame.width * scale}px`;
+  mob.el.style.height = `${frame.height * scale}px`;
 }
 
 const placeMob = mob => {
@@ -1202,9 +1204,16 @@ function setupCrossings() {
 const PORTAL_COLORS = [[38, 8, 84], [58, 16, 132], [86, 30, 186], [120, 56, 226], [164, 98, 255], [104, 40, 206], [70, 22, 160]];
 const STAR_COLORS = ['#1e7a6a', '#2fb39a', '#9fe8d2', '#6a4cc0', '#d0b4ff'];
 
+// El portal prendido: la animación del juego en un hueco de 2 × 3 bloques (o el remolino dibujado, sin el atlas).
 function drawSwirl(canvas, t) {
   const ctx = canvas.getContext('2d');
   const { width: w, height: h } = canvas;
+  const frame = P.portal(t);
+  if (frame) {
+    ctx.clearRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) ctx.drawImage(frame, x, y);
+    return;
+  }
   const image = ctx.createImageData(w, h);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -1408,7 +1417,7 @@ const ITEMS = {
   netherite_ingot: ['Lingote de netherita', 'sprite:ingot-netherite'],
   coal: ['Carbón', 'sprite:lump-coal'],
   netherite_scrap: ['Fragmento de netherita', 'sprite:lump-netherite'],
-  ancient_debris: ['Escombros ancestrales', 'iso:tint:#6b4a3a,#5a3d30,#7d5a48,#4a3026|tint:#6b4a3a,#5a3d30,#7d5a48,#4a3026'],
+  ancient_debris: ['Escombros ancestrales', 'iso:ancientDebrisTop|ancientDebris'],
   arrow: ['Flecha', 'sprite:arrow'],
   emerald: ['Esmeralda', 'sprite:gem-emerald'],
   diamond: ['Diamante', 'sprite:gem-diamond'],
@@ -1422,8 +1431,8 @@ const ITEMS = {
   name_tag: ['Etiqueta', 'sprite:tag'],
   saddle: ['Montura', 'sprite:saddle'],
   obsidian: ['Obsidiana', 'iso:obsidian|obsidian'],
-  shulker_shell: ['Caparazón de shulker', 'iso:purpur|purpur'],
-  shulker_box: ['Caja de shulker', 'iso:purpur|purpur'],
+  shulker_shell: ['Caparazón de shulker', 'sprite:shell'],
+  shulker_box: ['Caja de shulker', 'iso:shulker|shulker'],
   diamond_pickaxe: ['Pico de diamante', 'sprite:pickaxe'],
   netherite_pickaxe: ['Pico de netherita', 'sprite:pickaxe-netherite'],
   diamond_sword: ['Espada de diamante', 'sprite:sword-diamond'],
@@ -1431,11 +1440,11 @@ const ITEMS = {
   diamond_chestplate: ['Peto de diamante', 'sprite:chest-diamond'],
   totem_of_undying: ['Tótem de la inmortalidad', 'sprite:totem'],
   elytra: ['Élitros', 'sprite:elytra'],
-  beacon: ['Faro', 'iso:tint:#bdfcf6,#7ff3ea,#e6fffc,#4fe3db|tint:#bdfcf6,#7ff3ea,#e6fffc,#4fe3db'],
+  beacon: ['Faro', 'iso:beacon|beacon'],
   torch: ['Antorcha', 'sprite:torch'],
-  oak_log: ['Tronco de roble', 'iso:planks|log'],
-  iron_block: ['Bloque de hierro', 'iso:tint:#e6e6e6,#d0d0d0,#f4f4f4,#bcbcbc|tint:#e6e6e6,#d0d0d0,#f4f4f4,#bcbcbc'],
-  diamond_block: ['Bloque de diamante', 'iso:tint:#7ff3ea,#5fe0d6,#b5fff9,#3fbfb5|tint:#7ff3ea,#5fe0d6,#b5fff9,#3fbfb5'],
+  oak_log: ['Tronco de roble', 'iso:logTop|log'],
+  iron_block: ['Bloque de hierro', 'iso:ironBlock|ironBlock'],
+  diamond_block: ['Bloque de diamante', 'iso:diamondBlock|diamondBlock'],
   blaze_rod: ['Vara de blaze', 'sprite:rod'],
 };
 const KEY_NAMES = { comun: 'Llave común', rara: 'Llave rara', epica: 'Llave épica', legendaria: 'Llave legendaria' };
@@ -1457,7 +1466,8 @@ function prizeName([item, count, , enchants, custom]) {
   return count > 1 ? `${name} ×${count}` : name;
 }
 const prizeSprite = item => (item.startsWith('llave:') ? `sprite:key-${item.slice(6)}` : ITEMS[item] ? ITEMS[item][1] : 'sprite:book');
-const isShiny = ([item, , , enchants]) => item === 'enchanted_book' || item === 'enchanted_golden_apple' || Boolean(enchants);
+// Las llaves brillan como en el juego (el plugin les pone el brillo de encantamiento).
+const isShiny = ([item, , , enchants]) => item === 'enchanted_book' || item === 'enchanted_golden_apple' || item.startsWith('llave:') || Boolean(enchants);
 
 function slotFor(prize) {
   const slot = document.createElement('span');
@@ -1757,7 +1767,7 @@ function setupBrand() {
   const icon = $('link[rel="icon"]');
   if (icon) {
     icon.type = 'image/png';
-    icon.href = P.url(P.iso('warpedTop', 'warpedNylium', 64));
+    icon.href = P.url(P.iso('own:warpedTop', 'own:warpedNylium', 64));
   }
 }
 
@@ -1929,4 +1939,5 @@ function init() {
   }, 700);
 }
 
-init();
+// Primero las texturas del juego (img/mc/atlas.png); si no llegan, se arranca con los dibujos propios.
+P.load().then(init);
