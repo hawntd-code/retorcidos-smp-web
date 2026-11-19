@@ -1761,16 +1761,38 @@ function setupBrand() {
   }
 }
 
+// El título del héroe: letras de bloques que pinta pixel.js. El texto real queda en el h1 para lectores
+// de pantalla y como respaldo si el dibujo no carga. «SMP» va a 0.6 del tamaño de «Retorcidos» (0.8 en celular).
+function setupLogo() {
+  const title = $('#titulo');
+  const parts = $$('img[data-logo]', title);
+  if (!parts.length) return;
+  for (const img of parts) {
+    const canvas = P.logo(img.dataset.logo, { skin: img.dataset.skin, moss: img.dataset.skin === 'stone', seed: P.hash(img.dataset.logo) });
+    img.src = P.url(canvas);
+    img.dataset.w = canvas.width;
+    img.dataset.h = canvas.height;
+  }
+  title.classList.add('has-logo');
+  const size = () => {
+    const main = parts[0];
+    const avail = title.clientWidth;
+    const room = innerWidth < 700 ? avail : Math.min(avail, innerWidth * 0.66);
+    const unit = Math.min(room / +main.dataset.w, 3.6);
+    const subScale = innerWidth < 700 ? 0.8 : 0.6;
+    parts.forEach((img, i) => {
+      const u = i === 0 ? unit : unit * subScale;
+      img.style.width = `${Math.round(+img.dataset.w * u)}px`;
+      img.style.height = `${Math.round(+img.dataset.h * u)}px`;
+    });
+  };
+  size();
+  new ResizeObserver(size).observe(title);
+}
+
 // ---------------------------------------------------------------- encabezado y teclado
 
 function setupChrome() {
-  let splashIndex = 0;
-  $('#splash').addEventListener('click', () => {
-    splashIndex = (splashIndex + 1) % S.splash.length;
-    $('#splash').textContent = S.splash[splashIndex];
-    sound('pop');
-  });
-
   const pause = $('#pause-motion');
   pause.addEventListener('click', () => {
     state.paused = !state.paused;
@@ -1862,6 +1884,7 @@ function init() {
   state.width = state.metrics.width;
   hydrate();
   setupBrand();
+  setupLogo();
   buildNavigation();
   renderHero();
   worlds.forEach(section => renderLayer(section));

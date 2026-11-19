@@ -1332,4 +1332,141 @@ function ground(options) {
   return { canvas, cssWidth: cols * bs, cssHeight: rows * bs };
 }
 
-export const Pixel = { texture, shaded, lit, crack, iso, sprite, mob, dropFor, colorsOf, url, world, ground, mulberry32, hash, makeCanvas };
+// ---------------------------------------------------------------- el título
+// Letras de bloques dibujadas aquí (no es la fuente ni el logo de Minecraft): trazos de dos celdas,
+// cara con textura, canto oscuro hacia abajo y contorno negro. Encima de cada superficie que mira
+// hacia arriba crece nylium distorsionado, como el pasto sobre la tierra.
+const GLYPHS = {
+  R: ['#####.', '######', '##..##', '######', '#####.', '##.##.', '##..##', '##..##'],
+  E: ['######', '######', '##....', '#####.', '#####.', '##....', '######', '######'],
+  T: ['######', '######', '..##..', '..##..', '..##..', '..##..', '..##..', '..##..'],
+  O: ['.####.', '######', '##..##', '##..##', '##..##', '##..##', '######', '.####.'],
+  C: ['.#####', '######', '##....', '##....', '##....', '##....', '######', '.#####'],
+  I: ['##', '##', '##', '##', '##', '##', '##', '##'],
+  D: ['#####.', '######', '##..##', '##..##', '##..##', '##..##', '######', '#####.'],
+  S: ['.#####', '######', '##....', '#####.', '.#####', '....##', '######', '#####.'],
+  M: ['##...##', '###.###', '#######', '##.#.##', '##...##', '##...##', '##...##', '##...##'],
+  P: ['#####.', '######', '##..##', '######', '#####.', '##....', '##....', '##....'],
+};
+
+const LOGO_SKINS = {
+  stone: {
+    face: PALETTES.stone, weights: [4, 4, 3, 2, 1], blotch: '#64646b',
+    top: '#c2c2c8', left: '#a3a3aa', bottom: '#4f4f56', right: '#5f5f66',
+    side: ['#4d4d55', '#46464e', '#3f3f47', '#383840', '#323239', '#2c2c33', '#27272d'],
+    outline: '#0b0713',
+  },
+  warped: {
+    face: ['#2a9d8f', '#23897e', '#31ad9e', '#1d776e', '#3fbcae'], weights: [4, 4, 3, 2, 1], blotch: '#1a6b64',
+    top: '#8ff0e2', left: '#5ad2c3', bottom: '#0f5450', right: '#156660',
+    side: ['#0f4d4c', '#0d4545', '#0b3d3e', '#093537', '#082e30', '#07282a', '#062224'],
+    outline: '#04101a',
+  },
+};
+
+function logo(text, options = {}) {
+  const { cell = 4, depth = 6, skin = 'stone', moss = false, seed = 1 } = options;
+  const look = LOGO_SKINS[skin] || LOGO_SKINS.stone;
+  const random = mulberry32(seed);
+  const rows = 8;
+
+  const placed = [];
+  let cols = 0;
+  [...String(text).toUpperCase()].forEach((ch, i) => {
+    if (i) cols += 1;
+    const glyph = GLYPHS[ch];
+    if (!glyph) {
+      cols += 2;
+      return;
+    }
+    placed.push({ glyph, col: cols });
+    cols += glyph[0].length;
+  });
+
+  const pad = 1;
+  const width = cols * cell + pad * 2;
+  const height = rows * cell + depth + pad * 2;
+  const face = new Uint8Array(width * height);
+  const body = new Uint8Array(width * height);
+  const isFace = (x, y) => x >= 0 && y >= 0 && x < width && y < height && face[y * width + x] === 1;
+  const isBody = (x, y) => x >= 0 && y >= 0 && x < width && y < height && body[y * width + x] === 1;
+
+  for (const { glyph, col } of placed) {
+    glyph.forEach((line, r) => {
+      [...line].forEach((mark, c) => {
+        if (mark !== '#') return;
+        for (let yy = 0; yy < cell; yy++) {
+          for (let xx = 0; xx < cell; xx++) face[(pad + r * cell + yy) * width + pad + (col + c) * cell + xx] = 1;
+        }
+      });
+    });
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!face[y * width + x]) continue;
+      for (let d = 0; d <= depth && y + d < height; d++) body[(y + d) * width + x] = 1;
+    }
+  }
+
+  const canvas = makeCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  // Contorno: todo lo que toca la letra (con su canto) por un lado o una esquina.
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (isBody(x, y)) continue;
+      let near = false;
+      for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1 && !near; dx++) near = isBody(x + dx, y + dy);
+      if (near) px(ctx, x, y, look.outline);
+    }
+  }
+
+  // El canto: más oscuro mientras más lejos queda de la cara.
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!isBody(x, y) || isFace(x, y)) continue;
+      let d = 1;
+      while (d < depth && !isFace(x, y - d)) d++;
+      const shade = Math.min(look.side.length - 1, d - 1 + (random() < 0.3 ? 1 : 0));
+      px(ctx, x, y, look.side[shade]);
+    }
+  }
+
+  // La cara, con su textura y un bisel de un pixel.
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!isFace(x, y)) continue;
+      let color = pick(random, look.face, look.weights);
+      if (random() < 0.05) color = look.blotch;
+      if (!isFace(x, y + 1)) color = look.bottom;
+      else if (!isFace(x + 1, y)) color = look.right;
+      if (!isFace(x - 1, y)) color = look.left;
+      if (!isFace(x, y - 1)) color = look.top;
+      px(ctx, x, y, color);
+    }
+  }
+
+  // El nylium: sobre cada superficie que mira hacia arriba, de 2 a 5 pixeles y a veces una gota más larga.
+  if (moss) {
+    const greens = ['#167e86', '#2a9d8f', '#14625f', '#3fbcae'];
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        if (!isFace(x, y) || isFace(x, y - 1)) continue;
+        let grow = 2 + (random() < 0.55 ? 1 : 0) + (random() < 0.25 ? 1 : 0);
+        if (random() < 0.12) grow += 2 + randomInt(random, 3);
+        let k = 0;
+        for (; k < grow && isFace(x, y + k); k++) {
+          let color = k === 0 ? (random() < 0.6 ? '#7fe3d6' : '#3fbcae') : pick(random, greens, [3, 4, 2, 2]);
+          if (k > 0 && !isFace(x + 1, y + k)) color = '#0f5552';
+          if (k > 0 && !isFace(x - 1, y + k)) color = '#3fbcae';
+          px(ctx, x, y + k, color);
+        }
+        if (isFace(x, y + k) && isFace(x, y + k + 1)) px(ctx, x, y + k, look.bottom);
+      }
+    }
+  }
+
+  return canvas;
+}
+
+export const Pixel = { texture, shaded, lit, crack, iso, sprite, mob, dropFor, colorsOf, url, world, ground, logo, mulberry32, hash, makeCanvas };

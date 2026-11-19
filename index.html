@@ -79,16 +79,15 @@
     <canvas class="hills hills-near day" id="hills-near-day" aria-hidden="true"></canvas>
 
     <div class="hero-copy wrap">
-      <div class="title-wrap">
-        <h1 class="hero-title" id="titulo"><span>Retorcidos</span> <span class="accent">SMP</span></h1>
-        <button class="splash" id="splash" type="button" title="Otra frase">¡Sin protecciones!</button>
-      </div>
-      <p class="hero-text">Survival en difícil para Java y Bedrock. Sin protecciones, sin /home y sin minimapas: lo que construyes lo cuida tu clan.</p>
+      <h1 class="hero-logo" id="titulo">
+        <span class="logo-text">Retorcidos <span class="accent">SMP</span></span>
+        <img class="logo-main" data-logo="Retorcidos" data-skin="stone" alt="" aria-hidden="true">
+        <img class="logo-sub" data-logo="SMP" data-skin="warped" alt="" aria-hidden="true">
+      </h1>
       <div class="btn-row">
         <button class="btn btn-primary btn-big" type="button" id="copiar-java" data-copy="retorci2.play.hosting"><span class="copy-label">Copiar IP de Java</span><small>retorci2.play.hosting</small></button>
         <button class="btn btn-ghost btn-big" type="button" data-copy="springblossom.wdn.gg"><span class="copy-label">Copiar IP de Bedrock</span><small>springblossom.wdn.gg · puerto 443</small></button>
       </div>
-      <p class="hero-small">Versión 26.3. También entras con <a href="https://parabellum-roan.vercel.app/">Parabellum</a>, el launcher de la comunidad.</p>
     </div>
 
     <div class="hero-stage" id="hero-stage">
@@ -102,7 +101,7 @@
       <div class="mobs" id="mobs"></div>
       <canvas class="ground" id="ground" aria-hidden="true"></canvas>
     </div>
-    <a class="dig-cue" href="#reglas"><span class="pick" data-px="sprite:pickaxe" aria-hidden="true"></span><span>Excava</span></a>
+    <a class="dig-cue" href="#reglas" aria-label="Bajar a las reglas"><span class="pick" data-px="sprite:pickaxe" aria-hidden="true"></span></a>
   </section>
 
   <!-- ============================================================ Overworld: las reglas -->
@@ -474,7 +473,6 @@
   "creeperTitle": "Ssssss…",
   "creeperText": "Aquí no explota nada",
   "voidBiome": "El vacío",
-  "splash": ["¡Sin protecciones!", "¡Java y Bedrock!", "¡60 días de pase!", "¡Filo X!", "¡Sin minimapas!", "¡Versión 26.3!", "¡Ojo con el creeper!", "¡También en Parabellum!"],
   "header": { "pause": "Pausar animaciones", "resume": "Reanudar animaciones", "soundOn": "Activar sonido", "soundOff": "Quitar sonido" },
   "gallery": { "count": "{n} de {total}" },
   "crate": { "title": "Caja {name}", "chance": "{n} %", "won": "Te tocó" },
