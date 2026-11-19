@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retorcidos SMP · Survival para Java y Bedrock</title>
+<meta name="description" content="Survival de Minecraft en difícil y sin protecciones, para Java y Bedrock. Clanes, cajas con llaves, un pase de 60 días y tu skin de Parabellum.">
+<meta name="theme-color" content="#21412c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Retorcidos SMP">
+<meta property="og:description" content="Survival de Minecraft en difícil y sin protecciones, para Java y Bedrock.">
+<meta property="og:image" content="img/compartir.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,700..900&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/sitio.css">
+<script src="js/sitio.js" defer></script>
+</head>
+<body data-world="overworld">
+<a class="salto" href="#contenido">Saltar al contenido</a>
+<header class="barra">
+  <a class="barra-marca" href="index.html" data-mundo="overworld">Retorcidos SMP</a>
+  <nav class="mundos" aria-label="Dimensiones">
+    <a href="index.html" data-mundo="overworld" aria-current="page">Overworld</a>
+    <a href="nether.html" data-mundo="nether">Nether</a>
+    <a href="end.html" data-mundo="end">End</a>
+  </nav>
+  <a class="boton" href="#entrar">Cómo entrar</a>
+</header>
+
+<main id="contenido" tabindex="-1">
+  <section class="portada" aria-labelledby="titulo-portada">
+    <div class="portada-campo">
+      <h1 class="display" id="titulo-portada"><span>Retorcidos</span><span class="chico">SMP</span></h1>
+      <p class="lede">Survival de Minecraft para Java y Bedrock. En difícil, sin protecciones y con un solo lugar seguro: el spawn.</p>
+      <div class="direcciones" id="entrar">
+        <div class="direccion">
+          <span class="plataforma">Java</span>
+          <span class="valor"><code>retorci2.play.hosting</code></span>
+          <button class="copiar" type="button" data-copiar="retorci2.play.hosting">Copiar</button>
+        </div>
+        <div class="direccion">
+          <span class="plataforma">Bedrock</span>
+          <span class="valor"><code>springblossom.wdn.gg</code><span class="puerto">puerto 443</span></span>
+          <button class="copiar" type="button" data-copiar="springblossom.wdn.gg">Copiar</button>
+        </div>
+      </div>
+      <p class="nota">Versión 26.3 (las cercanas también entran). Si nadie está jugando, el server se duerme: entra desde Java, espera un minuto y vuelve a entrar.</p>
+    </div>
+    <div class="portada-foto">
+      <img src="img/palacio-1280.webp" srcset="img/palacio-768.webp 768w, img/palacio-1280.webp 1280w, img/palacio-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 50vw" width="1280" height="720" alt="El palacio del spawn de Retorcidos SMP, con su glorieta al frente y el bosque alrededor." fetchpriority="high">
+    </div>
+  </section>
+
+  <section class="seccion oscura" aria-labelledby="titulo-reglas">
+    <div class="reticula">
+      <h2 class="titulo" id="titulo-reglas" style="grid-column: 1 / -1">Así se juega</h2>
+      <div class="reglas">
+        <div class="regla revela">
+          <h3>Sin protecciones</h3>
+          <p>Fuera del spawn se vale robar, romper y pelear. Nadie te regresa lo que pierdas, así que esconde bien tu base.</p>
+        </div>
+        <div class="regla revela">
+          <h3>Sin <code>/home</code></h3>
+          <p>Anota tus coordenadas con F3. Para ir y volver rápido: <code>/spawn</code>, y desde el spawn, <code>/volver</code> te regresa una vez a donde estabas.</p>
+        </div>
+        <div class="regla revela">
+          <h3>Sin minimapas</h3>
+          <p>No hay mapa en vivo y los minimapas están prohibidos. En la barra de ubicación solo aparecen los de tu clan.</p>
+        </div>
+        <div class="regla revela">
+          <h3>En difícil</h3>
+          <p>Los mobs pegan fuerte de verdad. Con que duerma uno de cada cuatro jugadores, se salta la noche.</p>
+        </div>
+      </div>
+      <div class="reglas-foto">
+        <img src="img/palacio-atardecer-768.webp" srcset="img/palacio-atardecer-768.webp 768w, img/palacio-atardecer-1280.webp 1280w, img/palacio-atardecer-1920.webp 1920w" sizes="30vw" width="768" height="432" loading="lazy" alt="El palacio del spawn al atardecer.">
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion campo" aria-labelledby="titulo-spawn">
+    <div class="reticula">
+      <div class="spawn-cabeza">
+        <h2 class="titulo" id="titulo-spawn">El spawn</h2>
+      </div>
+      <div class="spawn-texto texto">
+        <p class="lede">Llegas a la plaza de un palacio, con pueblo, mercado y río. Ahí no se pelea ni se rompe nada.</p>
+        <p>Cuando cruzas la gran puerta, el server te deja en un punto al azar del mapa, lejos de los demás. La construcción es «Village &amp; Palace», de MRVLAD70.</p>
+      </div>
+      <div class="spawn-fotos">
+        <img class="foto-grande revela-foto" src="img/puerta-1280.webp" srcset="img/puerta-768.webp 768w, img/puerta-1280.webp 1280w, img/puerta-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 66vw" width="1280" height="720" loading="lazy" alt="La gran puerta del palacio: el portal que te manda al mundo.">
+        <img class="foto-a revela-foto" src="img/cajas-768.webp" srcset="img/cajas-768.webp 768w, img/cajas-1280.webp 1280w, img/cajas-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 33vw" width="768" height="432" loading="lazy" alt="Las cajas de la plaza, sobre sus pedestales, con luz entre los árboles.">
+        <img class="foto-b revela-foto" src="img/mercado-768.webp" srcset="img/mercado-768.webp 768w, img/mercado-1280.webp 1280w, img/mercado-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 33vw" width="768" height="432" loading="lazy" alt="El mercado del pueblo, entre los árboles.">
+      </div>
+    </div>
+  </section>
+
+  <section class="cruce" aria-label="Siguiente dimensión">
+    <p class="cruce-titulo">Clanes y botín, en el <span class="destino">Nether</span></p>
+    <div class="cruce-barra" aria-hidden="true"><i></i></div>
+    <a class="boton secundario" href="nether.html" data-mundo="nether">Cruzar al Nether</a>
+  </section>
+</main>
+
+<p class="legal">Retorcidos SMP es un proyecto de la comunidad, sin relación con Mojang ni Microsoft.</p>
+<div class="aviso-cruce" hidden><span></span><div aria-hidden="true"><i></i></div></div>
+<div class="portal" hidden aria-hidden="true"><strong></strong><span></span></div>
+<div class="aviso" role="status" aria-live="polite"></div>
+</body>
+</html>
