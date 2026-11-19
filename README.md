@@ -1,7 +1,7 @@
 # Retorcidos SMP · web
 
 La página del servidor Retorcidos SMP (survival de Minecraft para Java y Bedrock). Es un corte del mundo: se baja
-desde la superficie del Overworld, se cruza el portal al Nether, se pasa por la fortaleza al portal del End y se
+desde la superficie del Overworld, se cruza el portal al Nether, se vuelve al portal del End del spawn y se
 cae al vacío, donde está el pie.
 
 - `index.html`: toda la página, capa por capa (reglas, spawn, clanes, portal al Nether, llaves y cajas, Filo X,

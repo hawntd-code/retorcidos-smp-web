@@ -1,5 +1,5 @@
 // Retorcidos SMP · el viaje. La página es un corte del mundo: se baja desde la superficie del Overworld,
-// se cruza el portal al Nether, se sube por la fortaleza al portal del End y se cae al vacío.
+// se cruza el portal al Nether, se vuelve al portal del End del spawn y se cae al vacío.
 // Motor tomado del prototipo «Excavación» de Parabellum (capas, criaturas, HUD, barra rápida, minerales,
 // sonidos y el pie que se descubre). Lo nuevo: las dimensiones, los dos cruces de portal, la caja de prueba
 // (con los premios y pesos reales de cajas.yml), el pase (pase.yml) y el huevo del dragón.
@@ -1187,7 +1187,7 @@ function setupCrossings() {
         const random = P.mulberry32(300 + layer);
         return Array.from({ length: 26 - layer * 6 }, () => ({ x: random() * 48, y: random() * 48, c: Math.floor(random() * 5) }));
       });
-      // El piso de la fortaleza, visto desde arriba.
+      // El piso alrededor del portal, visto desde arriba.
       const floor = P.makeCanvas(16 * 8, 16 * 8);
       const ctx = floor.getContext('2d');
       const random = P.mulberry32(77);
