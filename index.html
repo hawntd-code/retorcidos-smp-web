@@ -1,113 +1,497 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Retorcidos SMP · Survival para Java y Bedrock</title>
-<meta name="description" content="Survival de Minecraft en difícil y sin protecciones, para Java y Bedrock. Clanes, cajas con llaves, un pase de 60 días y tu skin de Parabellum.">
-<meta name="theme-color" content="#21412c">
+<meta name="description" content="Survival en difícil para Java y Bedrock: sin protecciones, sin /home y sin minimapas. Clanes, llaves y cajas, Filo X y un pase de 60 días.">
+<meta name="theme-color" content="#120a28">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Retorcidos SMP">
-<meta property="og:description" content="Survival de Minecraft en difícil y sin protecciones, para Java y Bedrock.">
+<meta property="og:description" content="Survival en difícil para Java y Bedrock. Entra con retorci2.play.hosting.">
 <meta property="og:image" content="img/compartir.jpg">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,700..900&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=VT323&display=swap">
 <link rel="stylesheet" href="css/sitio.css">
-<script src="js/sitio.js" defer></script>
+<script>
+  // El cielo que eligió la persona (de noche si nunca eligió), antes de pintar, para que no parpadee.
+  try { if (localStorage.getItem('retorcidos-cielo') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+</script>
+<script type="module" src="js/viaje.js"></script>
 </head>
-<body data-world="overworld">
-<a class="salto" href="#contenido">Saltar al contenido</a>
-<header class="barra">
-  <a class="barra-marca" href="index.html" data-mundo="overworld">Retorcidos SMP</a>
-  <nav class="mundos" aria-label="Dimensiones">
-    <a href="index.html" data-mundo="overworld" aria-current="page">Overworld</a>
-    <a href="nether.html" data-mundo="nether">Nether</a>
-    <a href="end.html" data-mundo="end">End</a>
-  </nav>
-  <a class="boton" href="#entrar">Cómo entrar</a>
+<body data-dim="overworld">
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<header class="site-header" id="site-header">
+  <div class="hud-left">
+    <a class="brand hud-island" id="brand" href="#inicio" aria-label="Retorcidos SMP, volver arriba">
+      <img data-px-img="iso:warpedTop|warpedNylium" alt="" width="34" height="34"><span>retorcidos</span>
+    </a>
+    <nav class="main-nav" aria-label="Secciones">
+      <a href="#reglas">Reglas</a>
+      <a href="#spawn">Spawn</a>
+      <a href="#clanes">Clanes</a>
+      <a href="#llaves">Llaves</a>
+      <a href="#pase">Pase</a>
+    </nav>
+  </div>
+  <div class="header-actions hud-island">
+    <div class="f3">
+      <button class="f3-chip" id="f3-chip" type="button" aria-expanded="false" aria-controls="biome-list" title="Capas">
+        <span class="f3-y" id="f3-y">Y 64</span><span class="f3-dim" id="f3-dim">overworld</span><span class="f3-biome" id="f3-biome">Llanuras</span><span class="f3-caret" aria-hidden="true">▾</span>
+        <span class="xp" aria-hidden="true"><span class="xp-bar"><span id="xp-fill"></span></span><span class="xp-level" id="xp-level">0</span></span>
+      </button>
+      <div class="biome-list" id="biome-list" hidden></div>
+    </div>
+    <button class="icon-btn theme-btn" id="theme-toggle" type="button" data-label-light="Que amanezca" data-label-dark="Que anochezca" aria-label="Que amanezca" title="Que amanezca">
+      <svg class="ico-sun" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 5h6v6H5z"></path><path d="M7 0h2v3H7zM7 13h2v3H7zM0 7h3v2H0zM13 7h3v2h-3zM2 2h2v2H2zM12 2h2v2h-2zM2 12h2v2H2zM12 12h2v2h-2z"></path></svg>
+      <svg class="ico-moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 1h5v2H8v2H6v6h2v2h3v2H6v-2H4v-2H3V5h1V3h2z"></path><path class="star" d="M12 5h2v2h-2zM13 9h1v1h-1z"></path></svg>
+    </button>
+    <button class="icon-btn" id="sound-toggle" type="button" aria-pressed="false" aria-label="Activar sonido" title="Activar sonido">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path class="spk" d="M2 6h3l4-3v10l-4-3H2z"></path><path class="wave" d="M11 5.5c1 1.4 1 3.6 0 5M13 4c2 2.3 2 5.7 0 8"></path><path class="mute" d="M11 6l4 4M15 6l-4 4"></path></svg>
+    </button>
+    <button class="icon-btn" id="pause-motion" type="button" aria-pressed="false" aria-label="Pausar animaciones" title="Pausar animaciones">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path class="pause" d="M4 3h3v10H4zM9 3h3v10H9z"></path><path class="play" d="M4 3l9 5-9 5z"></path></svg>
+    </button>
+    <a class="btn btn-primary btn-small" href="#entrar">Entrar</a>
+  </div>
 </header>
 
-<main id="contenido" tabindex="-1">
-  <section class="portada" aria-labelledby="titulo-portada">
-    <div class="portada-campo">
-      <h1 class="display" id="titulo-portada"><span>Retorcidos</span><span class="chico">SMP</span></h1>
-      <p class="lede">Survival de Minecraft para Java y Bedrock. En difícil, sin protecciones y con un solo lugar seguro: el spawn.</p>
-      <div class="direcciones" id="entrar">
-        <div class="direccion">
-          <span class="plataforma">Java</span>
-          <span class="valor"><code>retorci2.play.hosting</code></span>
-          <button class="copiar" type="button" data-copiar="retorci2.play.hosting">Copiar</button>
-        </div>
-        <div class="direccion">
-          <span class="plataforma">Bedrock</span>
-          <span class="valor"><code>springblossom.wdn.gg</code><span class="puerto">puerto 443</span></span>
-          <button class="copiar" type="button" data-copiar="springblossom.wdn.gg">Copiar</button>
-        </div>
-      </div>
-      <p class="nota">Versión 26.3 (las cercanas también entran). Si nadie está jugando, el server se duerme: entra desde Java, espera un minuto y vuelve a entrar.</p>
+<div class="miner" id="miner" aria-hidden="true"></div>
+
+<main id="main" tabindex="-1">
+
+  <!-- ============================================================ la superficie -->
+  <section class="hero" id="inicio" data-biome="Llanuras" data-label="La superficie" data-y="64" data-dim="overworld" aria-labelledby="titulo">
+    <canvas class="sky" id="sky" aria-hidden="true"></canvas>
+    <span class="shooting-stars" id="shooting-stars" aria-hidden="true"></span>
+    <div class="sky-bodies" id="sky-bodies" aria-hidden="true">
+      <button class="sky-body moon" type="button" tabindex="-1" data-px="sprite:moon" data-to="light"></button>
+      <button class="sky-body sun" type="button" tabindex="-1" data-px="sprite:sun" data-to="dark"></button>
     </div>
-    <div class="portada-foto">
-      <img src="img/palacio-1280.webp" srcset="img/palacio-768.webp 768w, img/palacio-1280.webp 1280w, img/palacio-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 50vw" width="1280" height="720" alt="El palacio del spawn de Retorcidos SMP, con su glorieta al frente y el bosque alrededor." fetchpriority="high">
+    <div class="clouds" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i></div>
+    <div class="birds" id="birds" aria-hidden="true"></div>
+    <canvas class="hills hills-far night" id="hills-far" aria-hidden="true"></canvas>
+    <canvas class="hills hills-far day" id="hills-far-day" aria-hidden="true"></canvas>
+    <canvas class="hills hills-near night" id="hills-near" aria-hidden="true"></canvas>
+    <canvas class="hills hills-near day" id="hills-near-day" aria-hidden="true"></canvas>
+
+    <div class="hero-copy wrap">
+      <div class="title-wrap">
+        <h1 class="hero-title" id="titulo"><span>Retorcidos</span> <span class="accent">SMP</span></h1>
+        <button class="splash" id="splash" type="button" title="Otra frase">¡Sin protecciones!</button>
+      </div>
+      <p class="hero-text">Survival en difícil para Java y Bedrock. Sin protecciones, sin /home y sin minimapas: lo que construyes lo cuida tu clan.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-big" type="button" id="copiar-java" data-copy="retorci2.play.hosting"><span class="copy-label">Copiar IP de Java</span><small>retorci2.play.hosting</small></button>
+        <button class="btn btn-ghost btn-big" type="button" data-copy="springblossom.wdn.gg"><span class="copy-label">Copiar IP de Bedrock</span><small>springblossom.wdn.gg · puerto 443</small></button>
+      </div>
+      <p class="hero-small">Versión 26.3. También entras con <a href="https://parabellum-roan.vercel.app/">Parabellum</a>, el launcher de la comunidad.</p>
+    </div>
+
+    <div class="hero-stage" id="hero-stage">
+      <div class="tree tree-a" data-px="sprite:tree" aria-hidden="true"></div>
+      <div class="tree tree-b" data-px="sprite:tree" aria-hidden="true"></div>
+      <div class="flowers" id="flowers" aria-hidden="true"></div>
+      <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <button class="drop-logo" id="drop-logo" type="button" aria-label="Recoger la llave">
+        <img data-px-img="sprite:key-legendaria" alt="" width="96" height="48"><i class="drop-shadow" aria-hidden="true"></i>
+      </button>
+      <div class="mobs" id="mobs"></div>
+      <canvas class="ground" id="ground" aria-hidden="true"></canvas>
+    </div>
+    <a class="dig-cue" href="#reglas"><span class="pick" data-px="sprite:pickaxe" aria-hidden="true"></span><span>Excava</span></a>
+  </section>
+
+  <!-- ============================================================ Overworld: las reglas -->
+  <section class="layer" id="reglas" data-material="dirt" data-biome="Bajo el pasto" data-label="Las reglas" data-y="52" data-dim="overworld" data-icon="iso:grassTop|grass" aria-labelledby="t-reglas">
+    <div class="wrap">
+      <div class="layer-head">
+        <p class="coord">XYZ: 214 / 52 / −731</p>
+        <h2 id="t-reglas">Aquí nadie te cuida la base</h2>
+        <p>Lo que construyes lo defiendes tú y tu clan. El mundo tiene cuatro reglas:</p>
+      </div>
+      <ul class="veins">
+        <li>
+          <span class="mine-wrap"><button class="mine" type="button" data-block="ore:stone:coal" data-name="Carbón" aria-label="Picar el mineral de carbón"></button></span>
+          <div><strong>Sin protecciones</strong><p>No hay claims ni regiones. Si alguien encuentra tu base, puede entrar.</p></div>
+        </li>
+        <li>
+          <span class="mine-wrap"><button class="mine" type="button" data-block="ore:stone:iron" data-name="Hierro" aria-label="Picar el mineral de hierro"></button></span>
+          <div><strong>Sin /home</strong><p><code>/spawn</code> te lleva a la plaza y <code>/volver</code> te regresa una vez a donde estabas. Lo demás, a pie.</p></div>
+        </li>
+        <li>
+          <span class="mine-wrap"><button class="mine" type="button" data-block="ore:stone:copper" data-name="Cobre" aria-label="Picar el mineral de cobre"></button></span>
+          <div><strong>Sin minimapas</strong><p>Están prohibidos y el server apaga el de Xaero al entrar. Para ubicarte: mapa, brújula y memoria.</p></div>
+        </li>
+        <li>
+          <span class="mine-wrap"><button class="mine" type="button" data-block="ore:stone:lapis" data-name="Lapislázuli" aria-label="Picar el mineral de lapislázuli"></button></span>
+          <div><strong>En difícil</strong><p>Los zombis tiran puertas y el hambre sí mata. La dificultad no se baja.</p></div>
+        </li>
+      </ul>
+      <p class="hint">Mantén presionado un mineral para picarlo.</p>
     </div>
   </section>
 
-  <section class="seccion oscura" aria-labelledby="titulo-reglas">
-    <div class="reticula">
-      <h2 class="titulo" id="titulo-reglas" style="grid-column: 1 / -1">Así se juega</h2>
-      <div class="reglas">
-        <div class="regla revela">
-          <h3>Sin protecciones</h3>
-          <p>Fuera del spawn se vale robar, romper y pelear. Nadie te regresa lo que pierdas, así que esconde bien tu base.</p>
-        </div>
-        <div class="regla revela">
-          <h3>Sin <code>/home</code></h3>
-          <p>Anota tus coordenadas con F3. Para ir y volver rápido: <code>/spawn</code>, y desde el spawn, <code>/volver</code> te regresa una vez a donde estabas.</p>
-        </div>
-        <div class="regla revela">
-          <h3>Sin minimapas</h3>
-          <p>No hay mapa en vivo y los minimapas están prohibidos. En la barra de ubicación solo aparecen los de tu clan.</p>
-        </div>
-        <div class="regla revela">
-          <h3>En difícil</h3>
-          <p>Los mobs pegan fuerte de verdad. Con que duerma uno de cada cuatro jugadores, se salta la noche.</p>
-        </div>
+  <!-- ============================================================ Overworld: el spawn -->
+  <section class="layer" id="spawn" data-material="cave" data-biome="Cueva" data-label="El spawn" data-y="30" data-dim="overworld" data-icon="iso:planks|planks" aria-labelledby="t-spawn">
+    <div class="wrap">
+      <div class="layer-head">
+        <p class="coord">XYZ: 0 / 30 / 0</p>
+        <h2 id="t-spawn">Llegas a un pueblo con palacio</h2>
+        <p>La plaza está frente al palacio: ahí están el mercado, las cuatro cajas, el Guardián que vende llaves y el Cronista del pase. Cuando estés listo, cruza el arco que dice «Al mundo» y apareces en un punto al azar del mapa.</p>
       </div>
-      <div class="reglas-foto">
-        <img src="img/palacio-atardecer-768.webp" srcset="img/palacio-atardecer-768.webp 768w, img/palacio-atardecer-1280.webp 1280w, img/palacio-atardecer-1920.webp 1920w" sizes="30vw" width="768" height="432" loading="lazy" alt="El palacio del spawn al atardecer.">
+      <div class="gallery">
+        <ul class="frames">
+          <li><button class="frame" type="button" data-full="img/palacio-1920.webp" data-alt="El palacio del spawn, con el bosque y la montaña detrás." aria-label="Ver en grande: el palacio"><span class="frame-wood" data-px="tex:planks"><img src="img/palacio-768.webp" srcset="img/palacio-768.webp 768w, img/palacio-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="El palacio del spawn, con el bosque y la montaña detrás."></span></button></li>
+          <li><button class="frame" type="button" data-full="img/pueblo-1920.webp" data-alt="El pueblo visto desde arriba: el molino, las casas y el palacio al fondo." aria-label="Ver en grande: el pueblo"><span class="frame-wood" data-px="tex:planks"><img src="img/pueblo-768.webp" srcset="img/pueblo-768.webp 768w, img/pueblo-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="El pueblo visto desde arriba: el molino, las casas y el palacio al fondo."></span></button></li>
+          <li><button class="frame" type="button" data-full="img/plaza-1920.webp" data-alt="La plaza del spawn con su kiosco y las bancas." aria-label="Ver en grande: la plaza"><span class="frame-wood" data-px="tex:planks"><img src="img/plaza-768.webp" srcset="img/plaza-768.webp 768w, img/plaza-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="La plaza del spawn con su kiosco y las bancas."></span></button></li>
+          <li><button class="frame" type="button" data-full="img/mercado-1920.webp" data-alt="Los puestos del mercado del pueblo." aria-label="Ver en grande: el mercado"><span class="frame-wood" data-px="tex:planks"><img src="img/mercado-768.webp" srcset="img/mercado-768.webp 768w, img/mercado-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="Los puestos del mercado del pueblo."></span></button></li>
+          <li><button class="frame" type="button" data-full="img/cajas-1920.webp" data-alt="Las cajas épica y legendaria en la plaza." aria-label="Ver en grande: las cajas"><span class="frame-wood" data-px="tex:planks"><img src="img/cajas-768.webp" srcset="img/cajas-768.webp 768w, img/cajas-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="Las cajas épica y legendaria en la plaza."></span></button></li>
+          <li><button class="frame" type="button" data-full="img/puerta-1920.webp" data-alt="El arco de la entrada del pueblo, que manda al mundo." aria-label="Ver en grande: el arco"><span class="frame-wood" data-px="tex:planks"><img src="img/puerta-768.webp" srcset="img/puerta-768.webp 768w, img/puerta-1280.webp 1280w" sizes="(max-width: 699px) 74vw, (max-width: 1099px) 44vw, 340px" width="768" height="432" loading="lazy" decoding="async" alt="El arco de la entrada del pueblo, que manda al mundo."></span></button></li>
+        </ul>
+        <p class="credit">El mapa del spawn es Village &amp; Palace, de MRVLAD70.</p>
       </div>
     </div>
   </section>
 
-  <section class="seccion campo" aria-labelledby="titulo-spawn">
-    <div class="reticula">
-      <div class="spawn-cabeza">
-        <h2 class="titulo" id="titulo-spawn">El spawn</h2>
+  <!-- ============================================================ Overworld: clanes -->
+  <section class="layer" id="clanes" data-material="deepslate" data-biome="Pizarra profunda" data-label="Clanes" data-y="-24" data-dim="overworld" data-icon="sprite:face-retorcido" aria-labelledby="t-clanes">
+    <div class="wrap split-2">
+      <div>
+        <div class="layer-head">
+          <p class="coord">XYZ: −388 / −24 / 1,052</p>
+          <h2 id="t-clanes">Juega en clan</h2>
+          <p>El nombre de tu clan sale en el chat, en la lista de jugadores y sobre tu cabeza, con su degradado. Entre miembros no se hacen daño.</p>
+        </div>
+        <dl class="commands">
+          <div><dt>/clan crear</dt><dd>Funda tu clan, con un nombre de hasta 12 letras.</dd></div>
+          <div><dt>/clan invitar</dt><dd>Suma a alguien; tiene dos minutos para aceptar.</dd></div>
+          <div><dt>/cc</dt><dd>Habla solo con tu clan.</dd></div>
+          <div><dt>/clan tp</dt><dd>Ve con un compañero, si acepta.</dd></div>
+          <div><dt>/clan base</dt><dd>Regresa a la base del clan.</dd></div>
+          <div><dt>/clan color</dt><dd>Elige el degradado: fuego, oro, océano, neón y más.</dd></div>
+        </dl>
       </div>
-      <div class="spawn-texto texto">
-        <p class="lede">Llegas a la plaza de un palacio, con pueblo, mercado y río. Ahí no se pelea ni se rompe nada.</p>
-        <p>Cuando cruzas la gran puerta, el server te deja en un punto al azar del mapa, lejos de los demás. La construcción es «Village &amp; Palace», de MRVLAD70.</p>
+      <div class="game-screen" role="img" aria-label="El chat del juego con mensajes del clan Lobos, y la barra de ubicación con dos compañeros de clan.">
+        <div class="chat" id="chat" aria-hidden="true"></div>
+        <div class="locator" aria-hidden="true">
+          <div class="locator-bar"><i class="t1"></i><i class="t2"></i></div>
+        </div>
       </div>
-      <div class="spawn-fotos">
-        <img class="foto-grande revela-foto" src="img/puerta-1280.webp" srcset="img/puerta-768.webp 768w, img/puerta-1280.webp 1280w, img/puerta-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 66vw" width="1280" height="720" loading="lazy" alt="La gran puerta del palacio: el portal que te manda al mundo.">
-        <img class="foto-a revela-foto" src="img/cajas-768.webp" srcset="img/cajas-768.webp 768w, img/cajas-1280.webp 1280w, img/cajas-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 33vw" width="768" height="432" loading="lazy" alt="Las cajas de la plaza, sobre sus pedestales, con luz entre los árboles.">
-        <img class="foto-b revela-foto" src="img/mercado-768.webp" srcset="img/mercado-768.webp 768w, img/mercado-1280.webp 1280w, img/mercado-1920.webp 1920w" sizes="(max-width: 900px) 100vw, 33vw" width="768" height="432" loading="lazy" alt="El mercado del pueblo, entre los árboles.">
+    </div>
+    <div class="wrap">
+      <p class="note" style="margin-top: 22px; text-align: right;">La barra de ubicación solo marca a los de tu clan. Los demás no saben dónde andas.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ el portal al Nether -->
+  <section class="cruce cruce-nether" id="portal-nether" data-cruce="nether" data-biome="Roca madre" data-label="Portal al Nether" data-y="-59" data-dim="overworld" aria-labelledby="t-portal-nether">
+    <div class="cruce-stage" data-material="diamond" data-shaft="none" data-seed="cruce-nether">
+      <div class="cruce-view">
+        <div class="cruce-floor" data-px="tex:bedrock" aria-hidden="true"></div>
+        <div class="np" aria-hidden="true">
+          <canvas class="np-frame"></canvas>
+          <canvas class="np-swirl"></canvas>
+        </div>
+      </div>
+      <div class="cruce-copy">
+        <p class="coord">XYZ: 12 / −59 / −88</p>
+        <h2 id="t-portal-nether">Al Nether</h2>
+        <p>Del otro lado están las llaves, las cajas y Filo X.</p>
+        <span class="cruce-cue">Sigue bajando</span>
       </div>
     </div>
   </section>
 
-  <section class="cruce" aria-label="Siguiente dimensión">
-    <p class="cruce-titulo">Clanes y botín, en el <span class="destino">Nether</span></p>
-    <div class="cruce-barra" aria-hidden="true"><i></i></div>
-    <a class="boton secundario" href="nether.html" data-mundo="nether">Cruzar al Nether</a>
+  <!-- ============================================================ Nether: llaves y cajas -->
+  <section class="layer" id="llaves" data-material="nether" data-biome="Páramos del Nether" data-label="Llaves y cajas" data-y="96" data-dim="nether" data-particles="embers" data-icon="sprite:key-legendaria" aria-labelledby="t-llaves">
+    <div class="wrap split-2 top">
+      <div class="layer-head">
+        <p class="coord">XYZ: 2 / 96 / −11</p>
+        <h2 id="t-llaves">Llaves y cajas</h2>
+        <p>Cada día que entras te llega una llave común. Las demás caen de los mobs, se compran con esmeraldas o las sueltan los jefes. <code>/cajas</code> las abre desde donde estés.</p>
+      </div>
+      <div class="crate" id="caja">
+        <div class="crate-tabs" role="group" aria-label="Elige la caja">
+          <button type="button" data-caja="comun" aria-selected="true"><i data-px="sprite:key-comun" aria-hidden="true"></i><span>Común</span></button>
+          <button type="button" data-caja="rara" aria-selected="false"><i data-px="sprite:key-rara" aria-hidden="true"></i><span>Rara</span></button>
+          <button type="button" data-caja="epica" aria-selected="false"><i data-px="sprite:key-epica" aria-hidden="true"></i><span>Épica</span></button>
+          <button type="button" data-caja="legendaria" aria-selected="false"><i data-px="sprite:key-legendaria" aria-hidden="true"></i><span>Legendaria</span></button>
+        </div>
+        <div class="gui crate-gui">
+          <p class="gui-title crate-title">Caja Común</p>
+          <div class="crate-rows">
+            <div class="panes" aria-hidden="true"><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane mark"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span></div>
+            <div class="crate-window" aria-hidden="true"><div class="crate-strip"></div></div>
+            <div class="panes" aria-hidden="true"><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane mark"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span><span class="slot pane"></span></div>
+          </div>
+          <div class="crate-foot">
+            <button class="btn btn-primary" type="button" id="caja-girar">Abrir de prueba</button>
+            <p class="crate-result" aria-live="polite"></p>
+          </div>
+        </div>
+        <p class="note">Mismos premios y probabilidades que en el server. Aquí no te llevas nada.</p>
+      </div>
+    </div>
+    <div class="wrap keys-wrap">
+      <table class="keys-table">
+        <caption class="sr-only">Cómo conseguir cada llave</caption>
+        <thead>
+          <tr><th scope="col">Llave</th><th scope="col">Mob hostil</th><th scope="col">Tienda del Guardián</th><th scope="col">Jefe</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><span style="--color: #e4e4e8"><i data-px="sprite:key-comun"></i>Común</span></th><td data-col="Mob hostil"><span class="odds">1 en 25</span></td><td data-col="Tienda">8 esmeraldas, 5 al día</td><td data-col="Jefe">—</td></tr>
+          <tr><th scope="row"><span style="--color: #7db8ff"><i data-px="sprite:key-rara"></i>Rara</span></th><td data-col="Mob hostil"><span class="odds">1 en 150</span></td><td data-col="Tienda">24 esmeraldas, 2 al día</td><td data-col="Jefe">Guardián anciano</td></tr>
+          <tr><th scope="row"><span style="--color: #d29cff"><i data-px="sprite:key-epica"></i>Épica</span></th><td data-col="Mob hostil"><span class="odds">1 en 600</span></td><td data-col="Tienda">64 esmeraldas, 1 al día</td><td data-col="Jefe">Warden y Wither</td></tr>
+          <tr><th scope="row"><span style="--color: #ffb21f"><i data-px="sprite:key-legendaria"></i>Legendaria</span></th><td data-col="Mob hostil"><span class="odds">1 en 2,500</span></td><td data-col="Tienda">No se vende</td><td data-col="Jefe">Dragón del End</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Botín sube la probabilidad. Los mobs de spawner no cuentan y hay un tope diario de llaves de mobs.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ Nether: Filo X -->
+  <section class="layer" id="filo" data-material="deltas" data-biome="Deltas de basalto" data-label="Filo X" data-y="40" data-dim="nether" data-particles="embers" data-icon="sprite:sword-netherite" aria-labelledby="t-filo">
+    <div class="wrap split-2">
+      <div class="painting">
+        <span class="frame-wood" data-px="tex:blackstone"><img src="img/nether-1280.webp" srcset="img/nether-768.webp 768w, img/nether-1280.webp 1280w, img/nether-1920.webp 1920w" sizes="(max-width: 1099px) 92vw, 560px" width="1280" height="720" loading="lazy" decoding="async" alt="Deltas de basalto en el Nether, con ríos de lava, con shaders."></span>
+      </div>
+      <div class="stack">
+        <div class="layer-head">
+          <p class="coord">XYZ: 160 / 40 / −402</p>
+          <h2 id="t-filo">Filo X</h2>
+          <p>En el yunque, dos piezas con el mismo encantamiento al máximo suben un nivel más: hasta Filo X, Eficiencia X o Protección VIII.</p>
+        </div>
+        <div class="gui" style="justify-self: start;">
+          <p class="gui-title">Yunque</p>
+          <div class="anvil-row">
+            <button class="slot glint" type="button" data-tip="Libro encantado|Filo IX"><i data-px="sprite:book" aria-hidden="true"></i><span class="sr-only">Libro encantado: Filo IX</span></button>
+            <span class="anvil-op" aria-hidden="true">+</span>
+            <button class="slot glint" type="button" data-tip="Libro encantado|Filo IX"><i data-px="sprite:book" aria-hidden="true"></i><span class="sr-only">Libro encantado: Filo IX</span></button>
+            <span class="anvil-arrow" aria-hidden="true"></span>
+            <button class="slot glint" type="button" data-tip="Libro encantado|Filo X"><i data-px="sprite:book" aria-hidden="true"></i><span class="sr-only">Resultado: libro encantado con Filo X</span></button>
+          </div>
+        </div>
+        <p class="note">Además hay 81 encantamientos nuevos en español, como Minero de vetas, Telequinesis o Leñador. Salen en la mesa de encantar, con los aldeanos y en las cajas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ el portal al End -->
+  <section class="cruce cruce-end" id="portal-end" data-cruce="end" data-biome="Fortaleza" data-label="Portal al End" data-y="24" data-dim="overworld" aria-labelledby="t-portal-end">
+    <div class="cruce-stage">
+      <div class="cruce-view">
+        <div class="ep-ring" aria-hidden="true"><canvas class="ep-void"></canvas></div>
+      </div>
+      <div class="cruce-copy">
+        <p class="coord">XYZ: 1,204 / 24 / −3,317</p>
+        <h2 id="t-portal-end">Al End</h2>
+        <p>Con las varas de blaze del Nether ya tienes ojos de ender. Faltan doce.</p>
+        <span class="cruce-cue">Sigue bajando</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ End: el pase -->
+  <section class="layer" id="pase" data-material="end" data-biome="El End" data-label="El pase" data-y="64" data-dim="end" data-particles="motes" data-icon="iso:endstone|endstone" aria-labelledby="t-pase">
+    <div class="wrap">
+      <div class="layer-head">
+        <p class="coord">XYZ: 100 / 64 / 0</p>
+        <h2 id="t-pase">Un premio por cada día que juegas</h2>
+        <p>Cada día distinto que entras se abre uno en <code>/pase</code>. No tienen que ser seguidos: si faltas una semana, sigues donde te quedaste. Toca un cuadro para ver qué trae.</p>
+      </div>
+      <div class="pass-layout">
+        <div class="gui pass-gui">
+          <p class="gui-title">Pase Retorcido</p>
+          <div class="pass-grid" id="pase-grid"></div>
+        </div>
+        <div>
+          <div class="scoreboard" role="img" aria-label="El marcador a la derecha de la pantalla: hora, clan, días jugados, avance del pase, llaves y jugadores conectados.">
+            <p class="sb-title">RETORCIDOS</p>
+            <p class="sb-gray">9:41 pm</p>
+            <p>Clan <span class="sb-clan">Lobos</span></p>
+            <p>Días <b>23</b></p>
+            <p>Pase <span><b>23</b><span class="sb-gray">/60</span></span></p>
+            <p>Llaves <b>4</b></p>
+            <p>Conectados <b>12</b></p>
+          </div>
+          <p class="scoreboard-note">Tu avance va siempre a la derecha de la pantalla. <code>/marcador</code> lo esconde.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ End: la Leyenda Retorcida -->
+  <section class="layer" id="leyenda" data-material="purpur" data-biome="Tierras altas del End" data-label="Día 60" data-y="72" data-dim="end" data-particles="motes" data-icon="sprite:elytra" aria-labelledby="t-leyenda">
+    <div class="wrap">
+      <div class="layer-head">
+        <p class="coord">XYZ: 1,630 / 72 / −248</p>
+        <h2 id="t-leyenda">Día 60: la Leyenda Retorcida</h2>
+      </div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-sprite glint" aria-hidden="true"><i data-px="sprite:sword-netherite"></i></div>
+          <p class="mc-tooltip">
+            <b class="name"><span style="color:#ffe066">F</span><span style="color:#ffd462">i</span><span style="color:#ffc95e">l</span><span style="color:#ffbd5a">o</span> <span style="color:#ffa652">R</span><span style="color:#ff9a4e">e</span><span style="color:#ff8f4a">t</span><span style="color:#ff8346">o</span><span style="color:#ff7742">r</span><span style="color:#ff6c3e">c</span><span style="color:#ff603a">i</span><span style="color:#ff5536">d</span><span style="color:#ff4d4d">o</span></b>
+            <span class="line">Filo VII</span>
+            <span class="line">Botín IV</span>
+            <span class="line">Aspecto ígneo II</span>
+            <span class="line">Filo arrasador IV</span>
+            <span class="line">Irrompibilidad V</span>
+            <span class="line">Reparación</span>
+          </p>
+        </div>
+        <div class="legend-item">
+          <div class="legend-sprite glint" aria-hidden="true"><i data-px="sprite:elytra"></i></div>
+          <p class="mc-tooltip">
+            <b class="name"><span style="color:#ffe066">A</span><span style="color:#ffcf5f">l</span><span style="color:#ffbd5a">a</span><span style="color:#ffac55">s</span> <span style="color:#ff9a4e">R</span><span style="color:#ff8f4a">e</span><span style="color:#ff8346">t</span><span style="color:#ff7742">o</span><span style="color:#ff6c3e">r</span><span style="color:#ff603a">c</span><span style="color:#ff5838">i</span><span style="color:#ff5236">d</span><span style="color:#ff4d40">a</span><span style="color:#ff4d4d">s</span></b>
+            <span class="line">Irrompibilidad V</span>
+            <span class="line">Reparación</span>
+          </p>
+        </div>
+      </div>
+      <p class="legend-rest">Y con ellas: dos llaves legendarias, tres tótems de la inmortalidad y un faro.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ End: entrar -->
+  <section class="layer" id="entrar" data-material="outer" data-biome="Islas exteriores" data-label="Entrar" data-y="50" data-dim="end" data-particles="motes" data-icon="sprite:egg" aria-labelledby="t-entrar">
+    <div class="wrap">
+      <div class="layer-head">
+        <p class="coord">XYZ: 1,000 / 50 / 1,000</p>
+        <h2 id="t-entrar">Entra hoy</h2>
+        <p>Agrega el server en Multijugador (en Bedrock, en Servidores) y nos vemos en la plaza.</p>
+      </div>
+      <div class="join">
+        <div>
+          <div class="server-list">
+            <div class="server-entry">
+              <img data-px-img="iso:warpedTop|warpedNylium" alt="" width="64" height="64">
+              <span class="se-name">Retorcidos SMP</span>
+              <span class="se-ping" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="se-motd">Java · <span>retorci2.play.hosting</span></span>
+              <button class="btn btn-primary btn-small" type="button" data-copy="retorci2.play.hosting"><span class="copy-label">Copiar</span></button>
+            </div>
+            <div class="bedrock-form">
+              <label>Dirección del servidor (Bedrock)
+                <span class="field">springblossom.wdn.gg <button class="btn btn-primary btn-tiny" type="button" data-copy="springblossom.wdn.gg"><span class="copy-label">Copiar</span></button></span>
+              </label>
+              <label>Puerto
+                <span class="field">443</span>
+              </label>
+            </div>
+          </div>
+          <p class="join-notes">Versión 26.3. Si nadie está jugando, el server se duerme: entra desde Java, espera un minuto y vuelve a entrar. La primera vez, regístrate con <code>/register</code>.</p>
+          <div class="egg-stage">
+            <span class="egg-pillar" data-px="tex:bedrock" aria-hidden="true"></span>
+            <button class="egg" id="huevo" type="button" data-px="sprite:egg" aria-label="El huevo del dragón"></button>
+          </div>
+        </div>
+        <div class="parabellum-card">
+          <h3>Parabellum</h3>
+          <p>El launcher gratis de la comunidad, para Windows y Mac.</p>
+          <ul>
+            <li><span><b>Tu skin, para todos.</b> La que pones en Parabellum la ven todos en el server, también los de Bedrock.</span></li>
+            <li><span><b>El modpack oficial.</b> Sodium e ImmediatelyFast para más FPS, Iris para shaders, JEI y Jade; se instala solo.</span></li>
+            <li><span><b>La comunidad.</b> Las reglas y los anuncios de Retorcidos, donde abres el juego.</span></li>
+          </ul>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://parabellum-roan.vercel.app/descargar/">Descargar Parabellum</a>
+            <a class="btn btn-ghost" href="https://parabellum-roan.vercel.app/">Conocer Parabellum</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </main>
 
-<p class="legal">Retorcidos SMP es un proyecto de la comunidad, sin relación con Mojang ni Microsoft.</p>
-<div class="aviso-cruce" hidden><span></span><div aria-hidden="true"><i></i></div></div>
-<div class="portal" hidden aria-hidden="true"><strong></strong><span></span></div>
-<div class="aviso" role="status" aria-live="polite"></div>
+<!-- ============================================================ el vacío -->
+<footer class="site-footer" id="vacio">
+  <div class="void-dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="wrap footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="#inicio"><img data-px-img="iso:warpedTop|warpedNylium" alt="" width="30" height="30"><span>retorcidos</span></a>
+      </div>
+      <nav class="footer-col footer-dig" aria-labelledby="f-capas">
+        <p class="footer-kicker" id="f-capas">El viaje</p>
+        <ul>
+          <li><a href="#reglas"><i data-px="iso:grassTop|grass" aria-hidden="true"></i><span>Las reglas</span><small>Y 52</small></a></li>
+          <li><a href="#spawn"><i data-px="iso:planks|planks" aria-hidden="true"></i><span>El spawn</span><small>Y 30</small></a></li>
+          <li><a href="#clanes"><i data-px="sprite:face-retorcido" aria-hidden="true"></i><span>Clanes</span><small>Y −24</small></a></li>
+          <li><a href="#llaves"><i data-px="sprite:key-legendaria" aria-hidden="true"></i><span>Llaves y cajas</span><small>Y 96</small></a></li>
+          <li><a href="#filo"><i data-px="sprite:sword-netherite" aria-hidden="true"></i><span>Filo X</span><small>Y 40</small></a></li>
+          <li><a href="#pase"><i data-px="iso:endstone|endstone" aria-hidden="true"></i><span>El pase</span><small>Y 64</small></a></li>
+          <li><a href="#leyenda"><i data-px="sprite:elytra" aria-hidden="true"></i><span>Día 60</span><small>Y 72</small></a></li>
+          <li><a href="#entrar"><i data-px="sprite:egg" aria-hidden="true"></i><span>Entrar</span><small>Y 50</small></a></li>
+        </ul>
+      </nav>
+      <div class="footer-col">
+        <p class="footer-kicker">Jugar</p>
+        <span class="addr">retorci2.play.hosting<small>Java</small></span>
+        <span class="addr">springblossom.wdn.gg<small>Bedrock, puerto 443</small></span>
+        <ul><li><a href="https://parabellum-roan.vercel.app/descargar/">Parabellum ↗</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <span>Retorcidos SMP · 2026</span>
+      <span class="footer-motto">Java · Bedrock · 26.3</span>
+      <span class="footer-actions">
+        <a class="to-surface" href="#inicio">Volver a la superficie <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M4 0h2v2H4zM2 2h2v2H2zM6 2h2v2H6zM0 4h2v2H0zM8 4h2v2H8z"/></svg></a>
+      </span>
+    </div>
+    <p class="legal">Proyecto de la comunidad, sin relación con Mojang ni Microsoft.</p>
+  </div>
+  <p class="footer-sign" aria-hidden="true">retorcidos</p>
+</footer>
+
+<nav class="hotbar in-hero" id="hotbar" aria-label="Barra rápida"></nav>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<div class="fx-layer" id="fx" aria-hidden="true"></div>
+
+<dialog class="lightbox" id="lightbox" aria-label="Capturas del spawn">
+  <figure>
+    <img id="lightbox-img" alt="" width="1920" height="1080">
+    <figcaption><small id="lightbox-count"></small></figcaption>
+  </figure>
+  <button class="lb-btn lb-prev" id="lightbox-prev" type="button" aria-label="Anterior"><svg viewBox="0 0 6 10" aria-hidden="true"><path d="M4 0h2v2H4zM2 2h2v2H2zM0 4h2v2H0zM2 6h2v2H2zM4 8h2v2H4z"/></svg></button>
+  <button class="lb-btn lb-next" id="lightbox-next" type="button" aria-label="Siguiente"><svg viewBox="0 0 6 10" aria-hidden="true"><path d="M0 0h2v2H0zM2 2h2v2H2zM4 4h2v2H4zM2 6h2v2H2zM0 8h2v2H0z"/></svg></button>
+  <button class="lb-btn lb-close" id="lightbox-close" type="button" aria-label="Cerrar" autofocus><svg viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0h2v2H0zM6 0h2v2H6zM2 2h4v4H2zM0 6h2v2H0zM6 6h2v2H6z"/></svg></button>
+</dialog>
+
+<script type="application/json" id="ui-strings">
+{
+  "key": "Tecla {n}",
+  "holdToMine": "Mantén presionado para picar",
+  "mined": "{name}: picado",
+  "achievement": "¡Logro conseguido!",
+  "picked": "Recogiste",
+  "logoBlock": "Llave legendaria",
+  "creeperTitle": "Ssssss…",
+  "creeperText": "Aquí no explota nada",
+  "voidBiome": "El vacío",
+  "splash": ["¡Sin protecciones!", "¡Java y Bedrock!", "¡60 días de pase!", "¡Filo X!", "¡Sin minimapas!", "¡Versión 26.3!", "¡Ojo con el creeper!", "¡También en Parabellum!"],
+  "header": { "pause": "Pausar animaciones", "resume": "Reanudar animaciones", "soundOn": "Activar sonido", "soundOff": "Quitar sonido" },
+  "gallery": { "count": "{n} de {total}" },
+  "crate": { "title": "Caja {name}", "chance": "{n} %", "won": "Te tocó" },
+  "pass": { "day": "Día {n}", "legend": "La Leyenda Retorcida: Filo Retorcido, Alas Retorcidas, 2 llaves legendarias, 3 tótems y un faro" },
+  "chat": [
+    ["cc", "Sara", "voy para la base, traigan antorchas"],
+    ["pub", "Hawntd", "¿quién trae hierro para la granja?"],
+    ["cc", "Leo", "hay una fortaleza en 1204 -3317"],
+    ["cc", "Mau", "ya junté 3 llaves raras, ¿vamos a las cajas?"],
+    ["pub", "Dani", "¿alguien vio dónde salió el warden?"],
+    ["cc", "Sara", "no digan las coords en el chat general"]
+  ],
+  "egg": "La siguiente generación",
+  "copied": "Copiado",
+  "copiedShort": "¡Copiada!",
+  "copyFailed": "No se pudo copiar"
+}
+</script>
 </body>
 </html>
